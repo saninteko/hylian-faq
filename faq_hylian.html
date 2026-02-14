@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Central de Dúvidas - Hylian Non-PVP</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        /* HEADER */
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px 20px;
+            text-align: center;
+            border-bottom: 4px solid #ffd700;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo {
+            width: 150px;
+            height: auto;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .header h1 {
+            color: #ffd700;
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .header p {
+            color: #ddd;
+            font-size: 16px;
+            letter-spacing: 1px;
+        }
+
+        /* ADMIN BADGE */
+        .admin-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: 600;
+            font-size: 12px;
+            z-index: 100;
+            display: none;
+        }
+
+        .admin-badge.show {
+            display: block;
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        /* TOOLBAR */
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .search-section {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 3px solid #ffd700;
+            border-radius: 10px;
+            background: white;
+            color: #333;
+        }
+
+        .search-input:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.3);
+        }
+
+        .suggest-btn {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            white-space: nowrap;
+        }
+
+        .suggest-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.5);
+        }
+
+        .suggest-btn:active {
+            transform: translateY(0);
+        }
+
+        .admin-btn {
+            padding: 15px 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+
+        .admin-btn:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-btn {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #ffd700;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #333;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .tab-btn:hover {
+            background: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        .tab-btn.active {
+            background: #ffd700;
+            color: #000;
+        }
+
+        /* ACCORDION LIST */
+        .faq-list {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .faq-item:last-child {
+            border-bottom: none;
+        }
+
+        .faq-question {
+            padding: 20px;
+            background: #f9f9f9;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .faq-question:hover {
+            background: #f0f0f0;
+        }
+
+        .faq-question.active {
+            background: #ffd700;
+            color: #000;
+        }
+
+        .faq-question-text {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex: 1;
+        }
+
+        .faq-category {
+            background: rgba(0, 0, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .faq-question.active .faq-category {
+            background: rgba(0, 0, 0, 0.2);
+        }
+
+        .faq-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .faq-toggle {
+            font-size: 20px;
+            transition: transform 0.3s;
+            flex-shrink: 0;
+        }
+
+        .faq-question.active .faq-toggle {
+            transform: rotate(180deg);
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            padding: 0 20px;
+        }
+
+        .faq-question.active + .faq-answer {
+            max-height: 500px;
+            padding: 20px;
+        }
+
+        .faq-answer-content {
+            color: #555;
+            line-height: 1.8;
+            font-size: 15px;
+            padding-bottom: 20px;
+        }
+
+        .copy-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #ffd700;
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            transition: all 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: #ffed4e;
+            transform: scale(1.05);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* EMPTY STATE */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .empty-state p {
+            font-size: 18px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: slideIn 0.3s ease-out;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #ffd700;
+            padding-bottom: 15px;
+        }
+
+        .modal-header h2 {
+            color: #ffd700;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #999;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            transform: translateY(-2px);
+        }
+
+        /* LOGIN FORM */
+        .login-form {
+            text-align: center;
+        }
+
+        .login-form-group {
+            margin-bottom: 20px;
+        }
+
+        .login-form-group label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .login-form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .login-form-group input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #000;
+            border: none;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            transform: translateY(-2px);
+        }
+
+        /* ADMIN PANEL */
+        .admin-panel {
+            margin-bottom: 30px;
+        }
+
+        .admin-title {
+            color: #ff6b6b;
+            font-size: 20px;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #ff6b6b;
+        }
+
+        .suggestions-list {
+            margin-top: 30px;
+        }
+
+        .suggestion-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 12px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .suggestion-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-category {
+            background: #ffd700;
+            color: #000;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .suggestion-delete-btn {
+            background: #ff0844;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .suggestion-delete-btn:hover {
+            background: #d90634;
+        }
+
+        .suggestion-question {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-answer {
+            color: #555;
+            margin-bottom: 8px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .suggestion-meta {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .empty-suggestions {
+            color: #999;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* FOOTER */
+        .footer {
+            background: rgba(0, 0, 0, 0.8);
+            color: #ddd;
+            text-align: center;
+            padding: 30px 20px;
+            margin-top: 60px;
+            border-top: 3px solid #ffd700;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        /* NOTIFICATION */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #11998e;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 5px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 2000;
+        }
+
+        .notification.show {
+            display: block;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .logout-btn:hover {
+            background: #ff5252;
+        }
+
+        /* RESPONSIVO */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 28px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .search-section {
+                width: 100%;
+            }
+
+            .suggest-btn,
+            .admin-btn {
+                width: 100%;
+            }
+
+            .faq-question {
+                padding: 15px;
+            }
+
+            .faq-question-text {
+                gap: 10px;
+            }
+
+            .faq-title {
+                font-size: 14px;
+            }
+
+            .faq-category {
+                font-size: 11px;
+            }
+
+            .tabs {
+                gap: 8px;
+            }
+
+            .tab-btn {
+                padding: 10px 18px;
+                font-size: 12px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <img src="logo.png" alt="Hylian Logo" class="logo">
+        <h1>🏰 HYLIAN - NON-PVP</h1>
+        <p>Central de Dúvidas - Respostas Rápidas e Precisas</p>
+    </div>
+
+    <!-- ADMIN BADGE -->
+    <div class="admin-badge" id="adminBadge">👨‍💼 MODO ADMIN</div>
+
+    <!-- CONTAINER -->
+    <div class="container">
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="search-section">
+                <input 
+                    type="text" 
+                    id="searchInput"
+                    class="search-input" 
+                    placeholder="🔍 Digite sua dúvida aqui..."
+                >
+            </div>
+            <button class="suggest-btn" onclick="openSuggestModal()">
+                ➕ Sugerir FAQ
+            </button>
+            <button class="admin-btn" id="adminBtn" onclick="openAdminLogin()">
+                👨‍💼 Admin
+            </button>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="filterByCategory('all')">📋 Todas</button>
+                <button class="tab-btn" onclick="filterByCategory('missoes')">⚔️ Missões</button>
+                <button class="tab-btn" onclick="filterByCategory('pvp')">🎯 PvP</button>
+                <button class="tab-btn" onclick="filterByCategory('itens')">🎁 Itens</button>
+                <button class="tab-btn" onclick="filterByCategory('leveling')">📈 Leveling</button>
+                <button class="tab-btn" onclick="filterByCategory('dungeons')">🏰 Dungeons</button>
+            </div>
+        </div>
+
+        <!-- FAQ ACCORDION -->
+        <div class="faq-list" id="faqContainer">
+            <!-- Itens serão inseridos aqui -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+            <p>😔 Nenhuma resposta encontrada para sua busca</p>
+        </div>
+    </div>
+
+    <!-- MODAL DE SUGESTÕES (Para usuários normais) -->
+    <div id="suggestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ Sugerir Pergunta/Resposta</h2>
+                <button class="close-btn" onclick="closeSuggestModal()">&times;</button>
+            </div>
+
+            <form id="suggestForm">
+                <div class="form-group">
+                    <label class="form-label">📂 Categoria</label>
+                    <select id="suggestCategory" class="form-select" required>
+                        <option value="">Selecione uma categoria...</option>
+                        <option value="missoes">⚔️ Missões</option>
+                        <option value="leveling">📈 Leveling</option>
+                        <option value="itens">🎁 Itens</option>
+                        <option value="pvp">🎯 PvP</option>
+                        <option value="dungeons">🏰 Dungeons</option>
+                        <option value="economia">💰 Economia</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">❓ Pergunta</label>
+                    <input type="text" id="suggestQuestion" class="form-input" placeholder="Ex: Como ganhar moedas rápido?" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">💬 Resposta</label>
+                    <textarea id="suggestAnswer" class="form-textarea" placeholder="Digite a resposta aqui..." rows="5" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">👤 Seu Nome (opcional)</label>
+                    <input type="text" id="suggestName" class="form-input" placeholder="Como você se chama?">
+                </div>
+
+                <button type="submit" class="submit-btn">✓ Enviar Sugestão</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADMIN LOGIN -->
+    <div id="adminLoginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔐 Login Admin</h2>
+                <button class="close-btn" onclick="closeAdminLogin()">&times;</button>
+            </div>
+
+            <form id="adminLoginForm" class="login-form">
+                <div class="login-form-group">
+                    <label>Senha Admin</label>
+                    <input type="password" id="adminPassword" placeholder="Digite a senha..." required>
+                </div>
+                <button type="submit" class="login-btn">🔓 Entrar</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADMIN PANEL -->
+    <div id="adminPanelModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>👨‍💼 Painel de Admin</h2>
+                <button class="close-btn" onclick="closeAdminPanel()">&times;</button>
+            </div>
+
+            <div class="admin-panel">
+                <h3 class="admin-title">📋 Sugestões Recebidas</h3>
+                <div id="adminSuggestionsList">
+                    <p class="empty-suggestions">Nenhuma sugestão ainda.</p>
+                </div>
+            </div>
+
+            <button class="logout-btn" onclick="logoutAdmin()" style="width: 100%; margin-top: 20px;">
+                🚪 Sair
+            </button>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        <p>© 2026 HYLIAN - NON-PVP Server</p>
+        <p>Desenvolvido por Tk para melhorar a vida dos Tutores</p>
+        <p>Dúvidas? Procure o <strong>Teko</strong> no chat!</p>
+    </div>
+
+    <!-- NOTIFICATION -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // ========== CONFIGURAÇÃO ==========
+        const ADMIN_PASSWORD = "admin123"; // MUDE ESTA SENHA!
+
+        // BASE DE DADOS DE FAQs
+        const faqs = [
+            {
+                id: 1,
+                category: 'missoes',
+                question: 'Como começar as primeiras missões?',
+                answer: 'Acesse a Town e procure pelo NPC de Missões. Comece pelas missões Easy para ganhar experiência e moedas. Aumente seu nível gradualmente passando para Normal e Hard. Todas as missões têm requisitos mínimos de nível!'
+            },
+            {
+                id: 2,
+                category: 'leveling',
+                question: 'Qual é a melhor forma de fazer leveling?',
+                answer: 'Faça todas as missões disponíveis para seu nível. Mate mobs na área correspondente ao seu nível. Complete Dungeons regularmente para mais experiência. Participe de eventos especiais para bônus extra. Não esqueça dos bônus diários de leveling!'
+            },
+            {
+                id: 3,
+                category: 'itens',
+                question: 'Como obter itens raros?',
+                answer: 'Complete Dungeons em dificuldade Hard ou Insane. Realize quests especiais com drop garantido. Compre no NPC de shop com moedas especiais. Participe de eventos exclusivos do servidor. Quanto mais você joga, mais chances tem de conseguir!'
+            },
+            {
+                id: 4,
+                category: 'dungeons',
+                question: 'O que é e como entrar em uma Dungeon?',
+                answer: 'Dungeons são áreas com mobs fortes e muitas recompensas. Procure o NPC de Dungeons na Town. Escolha a dificuldade apropriada para seu nível. Você pode entrar sozinho ou em grupo. Quanto mais difícil, melhor a recompensa!'
+            },
+            {
+                id: 5,
+                category: 'pvp',
+                question: 'Esse servidor tem PvP?',
+                answer: 'NÃO! Hylian é um servidor 100% Non-PvP. Você não pode atacar outros jogadores. Foco é em leveling, missões e cooperação. Ambiente seguro e amigável para todos. Diversão garantida sem preocupações! 🎮'
+            },
+            {
+                id: 6,
+                category: 'economia',
+                question: 'Como ganhar mais ouro/moedas?',
+                answer: 'Complete missões para melhor recompensa. Venda itens extras no NPC de shop. Participe de eventos especiais. Faça Dungeons em dificuldade alta. Quanto mais alto seu nível, melhores as recompensas!'
+            },
+            {
+                id: 7,
+                category: 'missoes',
+                question: 'Posso repetir missões?',
+                answer: 'Sim! Você pode repetir a maioria das missões. As recompensas diminuem a cada repetição. Sempre há novas missões conforme você avança. Verifique regularmente para novas quests. O NPC sempre tem novas surpresas!'
+            },
+            {
+                id: 8,
+                category: 'itens',
+                question: 'Como evoluir meus itens?',
+                answer: 'Procure o NPC de Evolução/Upgrade na Town. Você precisa de itens especiais e ouro. Cada evolução aumenta os atributos do item. Quanto maior o nível, mais forte você fica. Invista em seus melhores equipamentos primeiro!'
+            },
+            {
+                id: 9,
+                category: 'leveling',
+                question: 'Qual é o nível máximo?',
+                answer: 'O nível máximo atual é 200! Estamos sempre adicionando conteúdo novo. Continue evoluindo e desbloqueando novas áreas. Há sempre algo novo para fazer. O progresso nunca para em Hylian!'
+            },
+            {
+                id: 10,
+                category: 'dungeons',
+                question: 'Qual dungeon devo fazer primeiro?',
+                answer: 'Easy: recomendado a partir do nível 20. Normal: recomendado a partir do nível 50. Hard: recomendado a partir do nível 100. Insane: recomendado a partir do nível 150. Cada uma tem melhores recompensas que a anterior!'
+            }
+        ];
+
+        let currentFilter = 'all';
+        let openItem = null;
+        let suggestions = JSON.parse(localStorage.getItem('faqSuggestions')) || [];
+        let isAdmin = false;
+
+        // RENDER FAQs
+        function renderFaqs(filter = 'all') {
+            const container = document.getElementById('faqContainer');
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            let filtered = faqs.filter(faq => {
+                const matchCategory = filter === 'all' || faq.category === filter;
+                const matchSearch = faq.question.toLowerCase().includes(searchTerm) || 
+                                  faq.answer.toLowerCase().includes(searchTerm);
+                return matchCategory && matchSearch;
+            });
+
+            container.innerHTML = '';
+
+            if (filtered.length === 0) {
+                document.getElementById('emptyState').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('emptyState').style.display = 'none';
+
+            filtered.forEach(faq => {
+                const item = document.createElement('div');
+                item.className = 'faq-item';
+                
+                item.innerHTML = `
+                    <div class="faq-question" onclick="toggleQuestion(this, ${faq.id})">
+                        <div class="faq-question-text">
+                            <span class="faq-category">${getCategoryLabel(faq.category)}</span>
+                            <span class="faq-title">${faq.question}</span>
+                        </div>
+                        <span class="faq-toggle">▼</span>
+                    </div>
+                    <div class="faq-answer">
+                        <div class="faq-answer-content">
+                            ${faq.answer}
+                            <br>
+                            <button class="copy-btn" onclick="copyAnswer('${faq.answer.replace(/'/g, "\\'")}', event)">
+                                📋 Copiar Resposta
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                container.appendChild(item);
+            });
+        }
+
+        // TOGGLE ACCORDION
+        function toggleQuestion(element, faqId) {
+            if (openItem && openItem !== element) {
+                openItem.classList.remove('active');
+            }
+
+            element.classList.toggle('active');
+            openItem = element.classList.contains('active') ? element : null;
+        }
+
+        // CATEGORIAS
+        function getCategoryLabel(cat) {
+            const labels = {
+                'all': 'Todas',
+                'missoes': '⚔️ Missões',
+                'pvp': '🎯 PvP',
+                'itens': '🎁 Itens',
+                'leveling': '📈 Leveling',
+                'dungeons': '🏰 Dungeons',
+                'economia': '💰 Economia'
+            };
+            return labels[cat] || cat;
+        }
+
+        // FILTRAR POR CATEGORIA
+        function filterByCategory(category) {
+            currentFilter = category;
+            openItem = null;
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            renderFaqs(category);
+        }
+
+        // COPIAR RESPOSTA
+        function copyAnswer(text, event) {
+            event.stopPropagation();
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✓ Resposta copiada com sucesso!');
+            }).catch(() => {
+                showNotification('✗ Erro ao copiar resposta');
+            });
+        }
+
+        // NOTIFICAÇÃO
+        function showNotification(message) {
+            const notif = document.getElementById('notification');
+            notif.textContent = message;
+            notif.classList.add('show');
+            setTimeout(() => {
+                notif.classList.remove('show');
+            }, 3000);
+        }
+
+        // ========== SISTEMA DE SUGESTÕES (Usuários) ==========
+        function openSuggestModal() {
+            document.getElementById('suggestModal').classList.add('show');
+        }
+
+        function closeSuggestModal() {
+            document.getElementById('suggestModal').classList.remove('show');
+        }
+
+        // Enviar sugestão
+        document.getElementById('suggestForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const category = document.getElementById('suggestCategory').value;
+            const question = document.getElementById('suggestQuestion').value;
+            const answer = document.getElementById('suggestAnswer').value;
+            const name = document.getElementById('suggestName').value || 'Anônimo';
+
+            if (!category || !question || !answer) {
+                showNotification('✗ Preencha todos os campos obrigatórios!');
+                return;
+            }
+
+            const newSuggestion = {
+                category,
+                question,
+                answer,
+                name,
+                date: new Date().toISOString()
+            };
+
+            suggestions.push(newSuggestion);
+            localStorage.setItem('faqSuggestions', JSON.stringify(suggestions));
+
+            document.getElementById('suggestForm').reset();
+            closeSuggestModal();
+            showNotification('✓ Sugestão enviada com sucesso! Obrigado! 🙏');
+        });
+
+        // ========== SISTEMA DE ADMIN ==========
+        function openAdminLogin() {
+            document.getElementById('adminLoginModal').classList.add('show');
+        }
+
+        function closeAdminLogin() {
+            document.getElementById('adminLoginModal').classList.remove('show');
+        }
+
+        function closeAdminPanel() {
+            document.getElementById('adminPanelModal').classList.remove('show');
+        }
+
+        // Login admin
+        document.getElementById('adminLoginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+
+            if (password === ADMIN_PASSWORD) {
+                isAdmin = true;
+                document.getElementById('adminBadge').classList.add('show');
+                document.getElementById('adminPassword').value = '';
+                closeAdminLogin();
+                openAdminPanel();
+                renderAdminSuggestions();
+                showNotification('✓ Logado como admin!');
+            } else {
+                showNotification('✗ Senha incorreta!');
+            }
+        });
+
+        // Logout admin
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('adminBadge').classList.remove('show');
+            closeAdminPanel();
+            showNotification('✓ Deslogado!');
+        }
+
+        // Renderizar sugestões para admin
+        function renderAdminSuggestions() {
+            const suggestionsList = document.getElementById('adminSuggestionsList');
+            
+            if (suggestions.length === 0) {
+                suggestionsList.innerHTML = '<p class="empty-suggestions">Nenhuma sugestão ainda.</p>';
+                return;
+            }
+
+            suggestionsList.innerHTML = suggestions.map((sugg, index) => `
+                <div class="suggestion-card">
+                    <div class="suggestion-header">
+                        <span class="suggestion-category">${getCategoryLabel(sugg.category)}</span>
+                        <button type="button" onclick="deleteAdminSuggestion(${index})" class="suggestion-delete-btn">
+                            🗑️ Deletar
+                        </button>
+                    </div>
+                    <p class="suggestion-question">❓ ${sugg.question}</p>
+                    <p class="suggestion-answer">💬 ${sugg.answer}</p>
+                    <p class="suggestion-meta">👤 ${sugg.name || 'Anônimo'} | ${new Date(sugg.date).toLocaleDateString('pt-BR')}</p>
+                </div>
+            `).join('');
+        }
+
+        // Deletar sugestão (apenas admin)
+        function deleteAdminSuggestion(index) {
+            if (!isAdmin) {
+                showNotification('✗ Apenas admin pode deletar!');
+                return;
+            }
+
+            if (confirm('Tem certeza que quer deletar esta sugestão?')) {
+                suggestions.splice(index, 1);
+                localStorage.setItem('faqSuggestions', JSON.stringify(suggestions));
+                renderAdminSuggestions();
+                showNotification('✓ Sugestão deletada!');
+            }
+        }
+
+        // Fechar modals ao clicar fora
+        window.onclick = function(event) {
+            const suggestModal = document.getElementById('suggestModal');
+            const adminLoginModal = document.getElementById('adminLoginModal');
+            const adminPanelModal = document.getElementById('adminPanelModal');
+
+            if (event.target == suggestModal) {
+                suggestModal.classList.remove('show');
+            }
+            if (event.target == adminLoginModal) {
+                adminLoginModal.classList.remove('show');
+            }
+            if (event.target == adminPanelModal) {
+                adminPanelModal.classList.remove('show');
+            }
+        }
+
+        // BUSCA
+        document.getElementById('searchInput').addEventListener('keyup', () => {
+            renderFaqs(currentFilter);
+        });
+
+        // INICIALIZAR
+        renderFaqs();
+    </script>
+</body>
+</html>
